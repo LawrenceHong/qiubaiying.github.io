@@ -1,7 +1,7 @@
 # Site settings
 title:  洪大侠的2018
 SEOTitle: Leyou的博客 | My Blog
-header-img: img/post-bg-desk.jpg
+header-img: img/me.jpg
 email: lawrencehongengineer@gmail.com
 description: "Hard working."
 keyword: "Leyou的博客, Leyou Hong, 洪乐游, Block Chain"
@@ -12,7 +12,7 @@ github_repo: "https://github.com/LeyouHong/LeyouHong.github.io" # you code repos
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "Goals determine what you going to be!"
-sidebar-avatar: /img/post-bg-desk.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/me.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
