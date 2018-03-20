@@ -1,7 +1,7 @@
 # Site settings
 title:  洪大侠的2018
 SEOTitle: Leyou的博客 | My Blog
-header-img: img/me.jpg
+header-img: img/hamster.jpg
 email: lawrencehongengineer@gmail.com
 description: "Hard working."
 keyword: "Leyou的博客, Leyou Hong, 洪乐游, Block Chain"
@@ -74,7 +74,7 @@ kramdown:
 
 # Analytics settings
 # Baidu Analytics
-ba_track_id: b50bf2b12b5338a1845e33832976fd68
+#ba_track_id: b50bf2b12b5338a1845e33832976fd68
 
 # Google Analytics
 #ga_track_id: 'UA-90855596-1'            # Format: UA-xxxxxx-xx
@@ -85,8 +85,8 @@ ba_track_id: b50bf2b12b5338a1845e33832976fd68
 
 
 # Featured Tags
-featured-tags: true                     # 是否使用首页标签
-featured-condition-size: 1              # 相同标签数量大于这个数，才会出现在首页
+#featured-tags: true                     # 是否使用首页标签
+#featured-condition-size: 1              # 相同标签数量大于这个数，才会出现在首页
 
 
 
