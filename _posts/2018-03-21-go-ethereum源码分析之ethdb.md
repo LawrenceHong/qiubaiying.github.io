@@ -317,4 +317,12 @@ func (db *LDBDatabase) meter(refresh time.Duration) {
 	}
 }
 ```
+# ethdb在以太坊的使用例子:
+看这个CreatDB, 这里用到了db.Meter("eth/db/chaindata/"). 传了个prefix，就是来打印数据链的在leveldb上的信息的。
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/ethdb_usage3.jpg)
 
+# 我自己对这个模块的测试
+//明天更。。。
+
+		// Update all the requested meters更
+		// Update all the requested meters
