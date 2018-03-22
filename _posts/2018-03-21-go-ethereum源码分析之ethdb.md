@@ -179,7 +179,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/opt"
 )
 
-//看这个结构，用了github.com/syndtr/goleveldb/leveldb的leveldb的封装.<br>
+//看这个结构，用了github.com/syndtr/goleveldb/leveldb的leveldb的封装.
 //Mertrics是记录了数据库的使用情况吧。
 type LDBDatabase struct {
 	fn string      // filename for reporting
@@ -210,9 +210,9 @@ func (db *LDBDatabase) Has(key []byte) (bool, error) {
 	return db.db.Has(key, nil)
 }
 
-//NewLDBDatabase时候没有初始化Mertrics，在Meter里初始化的。<br>
-//这个方法每3秒钟获取一次leveldb内部的计数器，然后把他们公布到metrics子系统。<br>
-//不停的循环， 除非quitChan收到了一个退出信号。就是不停打印leveldb的使用情况咯。<br>
+//NewLDBDatabase时候没有初始化Mertrics，在Meter里初始化的。
+//这个方法每3秒钟获取一次leveldb内部的计数器，然后把他们公布到metrics子系统。
+//不停的循环， 除非quitChan收到了一个退出信号。就是不停打印leveldb的使用情况咯。
 func (db *LDBDatabase) Meter(prefix string) {
 	// Short circuit metering if the metrics system is disabled
 	if !metrics.Enabled {
@@ -238,7 +238,7 @@ func (db *LDBDatabase) Meter(prefix string) {
 }
 
 //继续往下走, 下面的注释是我们调用 db.db.GetProperty("leveldb.stats")返回的字符串，后续的代码需要解析这个字符串并把信息写入到Meter中。<br>
-//具体细节不分析了>_<<br>
+//具体细节不分析了>_<
 // meter periodically retrieves internal leveldb counters and reports them to
 // the metrics subsystem.
 // This is how a stats table look like (currently).
@@ -317,3 +317,4 @@ func (db *LDBDatabase) meter(refresh time.Duration) {
 	}
 }
 ```
+
