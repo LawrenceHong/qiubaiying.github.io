@@ -18,26 +18,27 @@ go-ethereum的所有的数据都存储在levelDB这个开源的Key-Value数据�
 
 ## 特点(引用于官方)
 
-key和value都是任意长度的字节数组；
-entry（即一条K-V记录）默认是按照key的字典顺序存储的，当然开发者也可以重载这个排序函数；
-提供的基本操作接口：Put()、Delete()、Get()、Batch()；
-支持批量操作以原子操作进行；
-可以创建数据全景的snapshot(快照)，并允许在快照中查找数据；
-可以通过前向（或后向）迭代器遍历数据（迭代器会隐含的创建一个snapshot）；
-自动使用Snappy压缩数据；
-可移植性；
+key和value都是任意长度的字节数组;<br>
+entry（即一条K-V记录）默认是按照key的字典顺序存储的，当然开发者也可以重载这个排序函数;<br>
+提供的基本操作接口：Put()、Delete()、Get()、Batch();<br>
+支持批量操作以原子操作进行;<br>
+可以创建数据全景的snapshot(快照)，并允许在快照中查找数据;<br>
+可以通过前向（或后向）迭代器遍历数据（迭代器会隐含的创建一个snapshot);<br>
+自动使用Snappy压缩数据;<br>
+可移植性;<br>
+
 ## 限制：
 
-非关系型数据模型（NoSQL），不支持sql语句，也不支持索引；
-一次只允许一个进程访问一个特定的数据库；
-没有内置的C/S架构，但开发者可以使用LevelDB库自己封装一个server；
+非关系型数据模型（NoSQL），不支持sql语句，也不支持索引；<br>
+一次只允许一个进程访问一个特定的数据库；<br>
+没有内置的C/S架构，但开发者可以使用LevelDB库自己封装一个server；<br>
 
 # ethereum/ethdb目录下的源码分析.
 首先源码很简单，就4个文件:
-interface.go
-database.go
-database_test.go
-memory_database.go
+interface.go<br>
+database.go<br>
+database_test.go<br>
+memory_database.go<br>
 
 ## interface.go
 ```
