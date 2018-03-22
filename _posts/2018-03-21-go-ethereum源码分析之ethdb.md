@@ -76,3 +76,244 @@ type Batch interface {
 	Reset()
 }
 ```
+## memory_database.go
+```
+//memory database, 顾名思义， 你看，用了map吧。还用了把读写多线程锁保护呢。
+type MemDatabase struct {
+	db   map[string][]byte
+	lock sync.RWMutex
+}
+
+func NewMemDatabase() (*MemDatabase, error) {
+	return &MemDatabase{
+		db: make(map[string][]byte),
+	}, nil
+}
+
+func (db *MemDatabase) Put(key []byte, value []byte) error {
+	db.lock.Lock()
+	defer db.lock.Unlock()
+
+	db.db[string(key)] = common.CopyBytes(value)
+	return nil
+}
+
+func (db *MemDatabase) Has(key []byte) (bool, error) {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	_, ok := db.db[string(key)]
+	return ok, nil
+}
+
+func (db *MemDatabase) Get(key []byte) ([]byte, error) {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	if entry, ok := db.db[string(key)]; ok {
+		return common.CopyBytes(entry), nil
+	}
+	return nil, errors.New("not found")
+}
+
+func (db *MemDatabase) Keys() [][]byte {
+	db.lock.RLock()
+	defer db.lock.RUnlock()
+
+	keys := [][]byte{}
+	for key := range db.db {
+		keys = append(keys, []byte(key))
+	}
+	return keys
+}
+
+func (db *MemDatabase) Delete(key []byte) error {
+	db.lock.Lock()
+	defer db.lock.Unlock()
+
+	delete(db.db, string(key))
+	return nil
+}
+```
+继续看Batch: 哎，就是批量操作而已，一看便知。
+```
+type kv struct{ k, v []byte }
+
+type memBatch struct {
+	db     *MemDatabase
+	writes []kv
+	size   int
+}
+
+func (b *memBatch) Put(key, value []byte) error {
+	b.writes = append(b.writes, kv{common.CopyBytes(key), common.CopyBytes(value)})
+	b.size += len(value)
+	return nil
+}
+
+func (b *memBatch) Write() error {
+	b.db.lock.Lock()
+	defer b.db.lock.Unlock()
+
+	for _, kv := range b.writes {
+		b.db.db[string(kv.k)] = kv.v
+	}
+	return nil
+}
+```
+## database.go
+```
+//看import，是对go level进行了封装.
+import (
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/metrics"
+	"github.com/syndtr/goleveldb/leveldb"
+	"github.com/syndtr/goleveldb/leveldb/errors"
+	"github.com/syndtr/goleveldb/leveldb/filter"
+	"github.com/syndtr/goleveldb/leveldb/iterator"
+	"github.com/syndtr/goleveldb/leveldb/opt"
+)
+
+//看这个结构，用了github.com/syndtr/goleveldb/leveldb的leveldb的封装.<br>
+//Mertrics是记录了数据库的使用情况吧。
+type LDBDatabase struct {
+	fn string      // filename for reporting
+	db *leveldb.DB // LevelDB instance
+
+	compTimeMeter  metrics.Meter // Meter for measuring the total time spent in database compaction
+	compReadMeter  metrics.Meter // Meter for measuring the data read during compaction
+	compWriteMeter metrics.Meter // Meter for measuring the data written during compaction
+	diskReadMeter  metrics.Meter // Meter for measuring the effective amount of data read
+	diskWriteMeter metrics.Meter // Meter for measuring the effective amount of data written
+
+	quitLock sync.Mutex      // Mutex protecting the quit channel access
+	quitChan chan chan error // Quit channel to stop the metrics collection before closing the database
+
+	log log.Logger // Contextual logger tracking the database path
+}
+
+//往下看看Put,Has, 没用锁，查阅了下资料，github.com/syndtr/goleveldb/leveldb封装之后是支持多线程，可并发。
+// Put puts the given key / value to the queue
+func (db *LDBDatabase) Put(key []byte, value []byte) error {
+	// Generate the data to write to disk, update the meter and write
+	//value = rle.Compress(value)
+
+	return db.db.Put(key, value, nil)
+}
+
+func (db *LDBDatabase) Has(key []byte) (bool, error) {
+	return db.db.Has(key, nil)
+}
+
+//NewLDBDatabase时候没有初始化Mertrics，在Meter里初始化的。<br>
+//这个方法每3秒钟获取一次leveldb内部的计数器，然后把他们公布到metrics子系统。<br>
+//不停的循环， 除非quitChan收到了一个退出信号。就是不停打印leveldb的使用情况咯。<br>
+func (db *LDBDatabase) Meter(prefix string) {
+	// Short circuit metering if the metrics system is disabled
+	if !metrics.Enabled {
+		return
+	}
+	// Initialize all the metrics collector at the requested prefix
+	db.getTimer = metrics.NewTimer(prefix + "user/gets")
+	db.putTimer = metrics.NewTimer(prefix + "user/puts")
+	db.delTimer = metrics.NewTimer(prefix + "user/dels")
+	db.missMeter = metrics.NewMeter(prefix + "user/misses")
+	db.readMeter = metrics.NewMeter(prefix + "user/reads")
+	db.writeMeter = metrics.NewMeter(prefix + "user/writes")
+	db.compTimeMeter = metrics.NewMeter(prefix + "compact/time")
+	db.compReadMeter = metrics.NewMeter(prefix + "compact/input")
+	db.compWriteMeter = metrics.NewMeter(prefix + "compact/output")
+
+	// Create a quit channel for the periodic collector and run it
+	db.quitLock.Lock()
+	db.quitChan = make(chan chan error)
+	db.quitLock.Unlock()
+
+	go db.meter(3 * time.Second)
+}
+
+//继续往下走, 下面的注释是我们调用 db.db.GetProperty("leveldb.stats")返回的字符串，后续的代码需要解析这个字符串并把信息写入到Meter中。<br>
+//具体细节不分析了>_<<br>
+// meter periodically retrieves internal leveldb counters and reports them to
+// the metrics subsystem.
+// This is how a stats table look like (currently).
+
+//   Compactions
+//    Level |   Tables   |    Size(MB)   |    Time(sec)  |    Read(MB)   |   Write(MB)
+//   -------+------------+---------------+---------------+---------------+---------------
+//      0   |          0 |       0.00000 |       1.27969 |       0.00000 |      12.31098
+//      1   |         85 |     109.27913 |      28.09293 |     213.92493 |     214.26294
+//      2   |        523 |    1000.37159 |       7.26059 |      66.86342 |      66.77884
+//      3   |        570 |    1113.18458 |       0.00000 |       0.00000 |       0.00000
+
+func (db *LDBDatabase) meter(refresh time.Duration) {
+	// Create the counters to store current and previous values
+	counters := make([][]float64, 2)
+	for i := 0; i < 2; i++ {
+		counters[i] = make([]float64, 3)
+	}
+	// Iterate ad infinitum and collect the stats
+	for i := 1; ; i++ {
+		// Retrieve the database stats
+		stats, err := db.db.GetProperty("leveldb.stats")
+		if err != nil {
+			db.log.Error("Failed to read database stats", "err", err)
+			return
+		}
+		// Find the compaction table, skip the header
+		lines := strings.Split(stats, "\n")
+		for len(lines) > 0 && strings.TrimSpace(lines[0]) != "Compactions" {
+			lines = lines[1:]
+		}
+		if len(lines) <= 3 {
+			db.log.Error("Compaction table not found")
+			return
+		}
+		lines = lines[3:]
+
+		// Iterate over all the table rows, and accumulate the entries
+		for j := 0; j < len(counters[i%2]); j++ {
+			counters[i%2][j] = 0
+		}
+		for _, line := range lines {
+			parts := strings.Split(line, "|")
+			if len(parts) != 6 {
+				break
+			}
+			for idx, counter := range parts[3:] {
+				value, err := strconv.ParseFloat(strings.TrimSpace(counter), 64)
+				if err != nil {
+					db.log.Error("Compaction entry parsing failed", "err", err)
+					return
+				}
+				counters[i%2][idx] += value
+			}
+		}
+		// Update all the requested meters
+		if db.compTimeMeter != nil {
+			db.compTimeMeter.Mark(int64((counters[i%2][0] - counters[(i-1)%2][0]) * 1000 * 1000 * 1000))
+		}
+		if db.compReadMeter != nil {
+			db.compReadMeter.Mark(int64((counters[i%2][1] - counters[(i-1)%2][1]) * 1024 * 1024))
+		}
+		if db.compWriteMeter != nil {
+			db.compWriteMeter.Mark(int64((counters[i%2][2] - counters[(i-1)%2][2]) * 1024 * 1024))
+		}
+		// Sleep a bit, then repeat the stats collection
+		select {
+		case errc := <-db.quitChan:
+			// Quit requesting, stop hammering the database
+			errc <- nil
+			return
+
+		case <-time.After(refresh):
+			// Timeout, gather a new set of stats
+		}
+	}
+}
+```
