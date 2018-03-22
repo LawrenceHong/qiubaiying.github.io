@@ -323,6 +323,3 @@ func (db *LDBDatabase) meter(refresh time.Duration) {
 
 # 我自己对这个模块的测试
 //明天更。。。
-
-		// Update all the requested meters更
-		// Update all the requested meters
