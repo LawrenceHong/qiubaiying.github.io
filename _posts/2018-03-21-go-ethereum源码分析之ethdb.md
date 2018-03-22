@@ -34,7 +34,7 @@ entry（即一条K-V记录）默认是按照key的字典顺序存储的，当然
 没有内置的C/S架构，但开发者可以使用LevelDB库自己封装一个server；<br>
 
 # ethereum/ethdb目录下的源码分析.
-首先源码很简单，就4个文件:
+首先源码很简单，就4个文件:<br>
 interface.go<br>
 database.go<br>
 database_test.go<br>
