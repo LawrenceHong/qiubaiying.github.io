@@ -14,9 +14,9 @@ tags:
 # 以太坊和levelDB
 go-ethereum的所有的数据都存储在levelDB这个开源的Key-Value数据库中，整个区块链的所有数据都存储在一个levelDB的数据库中，levelDB可以按照文件大小进行切分文件，所以我们看到的区块链的数据都是一个一个小文件，这些小文件都是同一个levelDB实例。
 
-# levelDB
+# levelDB(引用于官方)
 
-## 特点(引用于官方)
+## 特点
 
 key和value都是任意长度的字节数组;<br>
 entry（即一条K-V记录）默认是按照key的字典顺序存储的，当然开发者也可以重载这个排序函数;<br>
@@ -33,7 +33,7 @@ entry（即一条K-V记录）默认是按照key的字典顺序存储的，当然
 一次只允许一个进程访问一个特定的数据库；<br>
 没有内置的C/S架构，但开发者可以使用LevelDB库自己封装一个server；<br>
 
-# ethereum/ethdb目录下的源码分析.
+# ethereum/ethdb目录下的源码分析(我也是参考了下别人，看看后不难的，哈哈，捡个漏).
 首先源码很简单，就4个文件:<br>
 interface.go<br>
 database.go<br>
