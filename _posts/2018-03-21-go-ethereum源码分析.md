@@ -1,0 +1,73 @@
+---
+layout:     post
+title:      比特币的交易机制
+subtitle:  
+date:       2018-03-20
+author:     Leyou
+header-img: img/transaction.png
+catalog: true
+tags:
+---
+
+> 给大家讲讲比特币的交易机制。
+
+[一个通俗易懂的故事来解释比特币交易机制](http://blog.codinglabs.org/articles/bitcoin-mechanism-make-easy.html)
+
+# 简介
+比特币交易是比特币系统中最重要的部分。根据比特币系统的设计原理，系统中任何其他的部分都是为了确保比特币交易可以被生成、能在比特币网络中得以传播和通过验证，并最终添加入全球比特币交易总账簿（比特币区块链）。比特币交易的本质是数据结构，这些数据结构中含有比特币交易参与者价值转移的相关信息。比特币区块链是一本全球复式记账总账簿，每个比特币交易都是在比特币区块链上的一个公开记录。
+
+# 交易细节和幕后细节
+例如：Alice曾经在Bob的咖啡店（Alice与Bob's Cafe的交易）支付咖啡的交易。
+区块浏览器应用程序显示从Alice的“地址”到Bob的“地址”的交易。 这是一个非常简化的交易中包含的内容。 实际上，所显示的大部分信息都是由区块浏览器构建的，实际上并不在交易中。
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/transaction_front.png)
+在幕后，实际的交易看起来与典型的区块浏览器提供的交易非常不同。 事实上，我们在各种比特币应用程序用户界面中看到的大多数高级结构实际上并不存在于比特币系统中。
+
+我们可以使用Bitcoin Core的命令行界面（getrawtransaction和decodeawtransaction）来检索Alice的“原始”交易，对其进行解码，并查看它包含的内容。 结果如下： Alice的交易被解码后是这个样子：
+```
+{
+  "version": 1,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid":"7957a35fe64f80d234d76d83a2a8f1a0d8149a41d81de548f0a65a8a999f6f18",
+      "vout": 0,
+      "scriptSig": "3045022100884d142d86652a3f47ba4746ec719bbfbd040a570b1deccbb6498c75c4ae24cb02204b9f039ff08df09cbe9f6addac960298cad530a863ea8f53982c09db8f6e3813[ALL] 0484ecc0d46f1918b30928fa0e4ed99f16a0fb4fde0735e7ade8416ab9fe423cc5412336376789d172787ec3457eee41c04f4938de5cc17b4a10fa336a8d752adf",
+      "sequence": 4294967295
+    }
+ ],
+  "vout": [
+    {
+      "value": 0.01500000,
+      "scriptPubKey": "OP_DUP OP_HASH160 ab68025513c3dbd2f7b92a94e0581f5d50f654e7 OP_EQUALVERIFY OP_CHECKSIG"
+    },
+    {
+      "value": 0.08450000,
+      "scriptPubKey": "OP_DUP OP_HASH160 7f9b1a7fb68d60c536c2fd8aeaa53a8f3cc025a8 OP_EQUALVERIFY OP_CHECKSIG",
+    }
+  ]
+}
+```
+您可能会注意到这笔交易似乎少了些什么东西，比如：Alice的地址在哪里？Bob的地址在哪里？ Alice发送的“0.1”个币的输入在哪里？ 在比特币里，没有具体的货币，没有发送者，没有接收者，没有余额，没有帐户，没有地址。为了使用者的便利，以及使事情更容易理解，所有这些都构建在更高层次上。
+
+# 交易的输入输出
+比特币交易中的基础构建单元是交易输出。 交易输出是比特币不可分割的基本组合，记录在区块上，并被整个网络识别为有效。 比特币完整节点跟踪所有可找到的和可使用的输出，称为 “未花费的交易输出”（unspent transaction outputs），即UTXO。 所有UTXO的集合被称为UTXO集，目前有数百万个UTXO。 当新的UTXO被创建，UTXO集就会变大，当UTXO被消耗时，UTXO集会随着缩小。每一个交易都代表UTXO集的变化（状态转换）。
+
+以现实的钱包举例，一个钱包中有一个10元、1个5元，1个1元，一共16元。比特币一个账户的余额，也是根据这个账户UTXO计算的。 当花12元买东西时，可以把10元和5元拿出去，然后得到找零的3元， 那这个时候之前的10元和5元因为已经花出去了就不再是UTXO了，新找零的3元成为新的UTXO，再加上之前未动的1元UTXO，目前的余额是4元。这次新的交易记录在了新的区块上，但没有改变历史区块的数据。 比特币使用前后链接的区块链记录所有交易记录，当之前的UYXO出现在后续交易的输入时，就表示这个UTXO已经花费掉了，不再是UTXO了。 如果从第一个区块开始逐步计算所有比特币地址中的余额，就可以计算出不同时间的各个比特币账户的余额了。
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/utxo.jpg)
+
+# 交易费
+大多数交易包含交易费（矿工费），这是为了确保网络安全而给比特币矿工的一种补偿。费用本身也作为一个安全机制，使经济上不利于攻击者通过交易来淹没网络.
+交易费作为矿工打包（挖矿）一笔交易到下一个区块中的一种激励；同时作为一种抑制因素，通过对每一笔交易收取小额费用来防止对系统的滥用。成功挖到某区块的矿工将得到该区内包含的矿工费， 并将该区块添加至区块链中。
+
+费用估算数据可以通过简单的HTTP REST API（https://bitcoinfees.21.co/api/v1/fees/recommended）来检索。 例如，在命令行中使用curl命令：
+```
+$ curl https://bitcoinfees.21.co/api/v1/fees/recommended
+
+{"fastestFee":80,"halfHourFee":80,"hourFee":60}
+```
+API通过费用估算以 satoshi per byte 的方式返回一个 JSON 对象，从而实现”最快确认“ (fastestFee)，以及在三个块（halfHourFee）和六个块（hourFee）内确认。
+
+# 数字签名（ECDSA)
+比特币中使用的数字签名算法是椭圆曲线数字签名算法（Elliptic Curve Digital Signature Algorithm）或ECDSA。 ECDSA是用于基于椭圆曲线私钥/公钥对的数字签名的算法，如椭圆曲线章节[elliptic_curve]所述。 ECDSA用于脚本函数OP_CHECKSIG，OP_CHECKSIGVERIFY，OP_CHECKMULTISIG和OP_CHECKMULTISIGVERIFY。每当你锁定脚本中看到这些时，解锁脚本都必须包含一个ECDSA签名。
+
+数字签名在比特币中有三种用途（请参阅下面的侧栏）。第一，签名证明私钥的所有者，即资金所有者，已经授权支出这些资金。第二，授权证明是不可否认的（不可否认性）。第三，签名证明交易（或交易的具体部分）在签字之后没有也不能被任何人修改。
