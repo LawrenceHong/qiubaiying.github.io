@@ -18,8 +18,25 @@ JSON is a lightweight data-interchange format. It can represent numbers, strings
 JSON-RPC is a stateless, light-weight remote procedure call (RPC) protocol. Primarily this specification defines several data structures and the rules around their processing. It is transport agnostic in that the concepts can be used within the same process, over sockets, over HTTP, or in many various message passing environments. It uses JSON (RFC 4627) as data format.
 
 # RPC in ethereum
-RPC go files in go-ethereum
+RPC go files in go-ethereum:<br>
 ![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/rpc_code.jpg)
+I also read others' blog. Here is a structure picture of ethereum RPC:<br>
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/rpc_structure.png)
+So it's very clear that, we can list these code:<br>
+```
+client : client.go
 
+server : server.go
+         subscription.go
+         
+channels : websocket.go
+           http.go
+           ipc.go
+           inproc
+           
+Json part :json.go
 
+others : utils.go and types.go
+```
+Then we can read codes part by part.<br>
 
