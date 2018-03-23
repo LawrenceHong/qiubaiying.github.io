@@ -97,3 +97,4 @@ type ServerCodec interface {
 	Closed() <-chan interface{}
 }
 ```
+Now, you must know the developers just want to use this type.go to maintain data structures.<br>
