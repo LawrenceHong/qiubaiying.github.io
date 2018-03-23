@@ -322,4 +322,71 @@ func (db *LDBDatabase) meter(refresh time.Duration) {
 ![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/ethdb_usage3.jpg)
 
 # 我自己对这个模块的测试
-//明天更。。。
+```
+package main
+
+import (
+	"github.com/ethereum/go-ethereum/ethdb"
+
+	"io/ioutil"
+	"os"
+	"testing"
+	"bytes"
+	"flag"
+	"fmt"
+)
+
+func newLDB() (*ethdb.LDBDatabase, func()) {
+	dirname, err := ioutil.TempDir(os.TempDir(), "my ethdb test")
+	if err != nil {
+		panic("failed to create test file: " + err.Error())
+	}
+	db, err := ethdb.NewLDBDatabase(dirname, 0, 0)
+	if err != nil {
+		panic("failed to create test database: " + err.Error())
+	}
+
+	return db, func() {
+		db.Close()
+		os.RemoveAll(dirname)
+	}
+}
+
+func ethdbTest(t *testing.T) {
+	db, remove := newLDB()
+	defer remove()
+	//put
+	err := db.Put([]byte("name"), []byte("Leyou Hong"))
+	if err != nil {
+		t.Fatalf("failed to store hash to number mapping into database: %v", err)
+	} else {
+		fmt.Println("put ok")
+	}
+
+	//get
+	data, err := db.Get([]byte("name"))
+	if err != nil {
+		t.Fatalf("get failed: %v", err)
+	}
+	if !bytes.Equal(data, []byte("Leyou Hong")) {
+		t.Fatalf("get returned wrong result, got %q expected %q", string(data), "Leyou Hong")
+	} else {
+		fmt.Println("get ok")
+	}
+
+	err = db.Delete([]byte("name"))
+	if err != nil {
+		t.Fatalf("delete %q failed: %v", "name", err)
+	} else {
+		fmt.Println("delete ok")
+	}
+}
+
+func main() {
+	flag.Parse()
+	var t *testing.T
+	ethdbTest(t)
+}
+
+```
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/eth_demo_result.jpg)
