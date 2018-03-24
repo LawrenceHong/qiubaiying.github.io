@@ -38,7 +38,7 @@ Json part :json.go
 
 others : utils.go and types.go
 ```
-# 读完代码后对，这个RPC的理解。
+# 读完代码后对这个RPC的理解。
 以太坊的代码都有注释，说实话，读完注释你就知道这个接口干啥的。<br>
 对模块稍大点的先不要抠细节。<br>
 我讲讲调用流程<br>
