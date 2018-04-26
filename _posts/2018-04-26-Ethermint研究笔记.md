@@ -62,4 +62,5 @@ Commit 消息用于计算当前应用状态的一个加密保证（cryptographic
 一个应用可能有多个 ABCI socket 连接。Tendermint Core 给应用创建了三个 ABCI 连接：一个用于内存池广播时的交易验证，一个用于运行提交区块时的共识引擎，还有一个用于查询应用状态。
 
 很显然，在创建区块链时，应用的设计者需要非常小心地设计他们的消息处理，这个架构提供一个范例。下图阐释了通过 ABCI 的消息流：
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/tendermint-abci.png)<br>
 
