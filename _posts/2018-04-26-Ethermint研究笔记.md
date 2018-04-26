@@ -64,3 +64,8 @@ Commit 消息用于计算当前应用状态的一个加密保证（cryptographic
 很显然，在创建区块链时，应用的设计者需要非常小心地设计他们的消息处理，这个架构提供一个范例。下图阐释了通过 ABCI 的消息流：
 ![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/tendermint-abci.png)<br>
 
+# 共识
+Tendermint 是一个易于理解，大部分操作为异步的 BFT 共识协议。下图是一个简单的状态机，它展示了协议遵循的规则：
+![](https://raw.githubusercontent.com/LeyouHong/LeyouHong.github.io/master/img/tendermint-state-machine.png)<br>
+
+
