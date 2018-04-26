@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      Ethermint研究笔记
+title:      Ethermint简单介绍
 subtitle:  
 date:       2018-04-26
 author:     Leyou
