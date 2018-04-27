@@ -26,3 +26,15 @@ Maybe you will see the problem:
 make: gometalinter.v2: Command not found
 ```
 It seems that we need to install gometalinter : https://github.com/alecthomas/gometalinter
+We can use this cmd to install
+```
+$go get -u gopkg.in/alecthomas/gometalinter.v2
+```
+But we will still failed. Let's see Makefile.
+```
+get_tools:
+        @echo "--> Installing tools"
+        go get -u -v $(GOTOOLS)
+        @gometalinter.v2 --install
+        // Here we try to use gometalinter.v2 cmd in Linux, but we only have source code of gometalinter.v2.
+```
