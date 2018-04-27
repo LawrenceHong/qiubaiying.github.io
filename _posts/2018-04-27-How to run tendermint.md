@@ -25,3 +25,4 @@ Maybe you will see the problem:
 ```
 make: gometalinter.v2: Command not found
 ```
+It seems that we need to install gometalinter : https://github.com/alecthomas/gometalinter
