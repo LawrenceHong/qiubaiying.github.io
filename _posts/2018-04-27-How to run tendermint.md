@@ -20,12 +20,16 @@ If the installation failed, a dependency may have been updated and become incomp
 # Install
 First, install dep:
 ```
+cd $GOPATH/src/github.com/tendermint/tendermint
 $make get_tools
+$make get_vendor_deps
+$make install
+$
 ```
-## Trouble shooting
+## Trouble shooting(pro1, pro2 will happen when you share the workspace by using Virtual Machine)
 Maybe you will see these problem:
 
-### failed with gometalinter.v2
+### 1.failed with gometalinter.v2
 ```
 make: gometalinter.v2: Command not found
 ```
@@ -51,7 +55,7 @@ if you still failed, check the PATH
 make sure like it :
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 ```
-### The GOPATH of govet is wrong 
+### 2.The GOPATH of govet is wrong 
 ``` 
 get "gopkg.in/alecthomas/gometalinter.v2/vendor/gopkg.in/yaml.v2": verifying non-authoritative meta tag
 ...
@@ -68,5 +72,15 @@ $git clone https://github.com/dnephin/govet
 After this step. We can go back to tendermint and do 
 $make get_tools 
 
-You will pass
+You will pass, but when you do make get_vendor_deps, you will be locked.
 ```
+### 3.go install net: open /usr/lib/go-1.9/pkg/linux_amd64/net.a: permission denied
+change Makefile, remove CGO_ENABLED=0 from install
+```
+build_race:
+        CGO_ENABLED=0 go build -race $(BUILD_FLAGS) -tags '$(BUILD_TAGS)' -o build/tendermint ./cmd/tendermint
+
+install:
+        go install $(BUILD_FLAGS) -tags '$(BUILD_TAGS)' ./cmd/tendermint
+```
+
