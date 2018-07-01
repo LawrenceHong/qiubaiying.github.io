@@ -45,3 +45,5 @@ UN  127.0.0.1  204.71 KiB  256          100.0%            75317cee-c6aa-487a-904
 ```
 $ nodetool info
 ```
+# How to use CQL
+[CQL DOC](https://www.tutorialspoint.com/cassandra/cassandra_create_keyspace.htm)
