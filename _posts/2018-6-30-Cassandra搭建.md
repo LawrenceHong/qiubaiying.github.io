@@ -11,7 +11,7 @@ tags:
 > How to install Cassandra(3.11.2).
 
 # Install it in Mint 18
-Please refer to this page : [install](http://cassandra.apache.org/doc/latest/getting_started/installing.html)
+Please refer to this page : [install](http://cassandra.apache.org/doc/latest/getting_started/installing.html)</br>
 I install cassandra from Debian package.
 
 # start Cassandra
