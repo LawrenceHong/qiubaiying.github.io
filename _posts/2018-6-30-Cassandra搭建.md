@@ -22,5 +22,26 @@ sudo chown -R $USER:$GROUP /var/lib/cassandra
 ```
 run it 
 ```
-cassandra -f
+cassandra -f &
+```
+If you start cassandra failed, maybe the port has already be used. So please use this
+```
+ps -aux | grep cass
+```
+You can get cassandra PID and use the command to kill it.
+```
+kill -9 ${PID}
+```
+# check nodes status
+```
+parallels@linuxmint-vm ~ $ nodetool status
+Datacenter: datacenter1
+=======================
+Status=Up/Down
+|/ State=Normal/Leaving/Joining/Moving
+--  Address    Load       Tokens       Owns (effective)  Host ID                               Rack
+UN  127.0.0.1  204.71 KiB  256          100.0%            75317cee-c6aa-487a-9040-bd7e3c3d92aa  rack1
+```
+```
+$ nodetool info
 ```
