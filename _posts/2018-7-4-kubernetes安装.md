@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      How to use Cassandra
+title:      How to use kubernetes
 subtitle:  
 date:       2018-7-4
 author:     Leyou
