@@ -2,7 +2,7 @@
 layout:     post
 title:      How to use Cassandra
 subtitle:  
-date:       2018-07-04
+date:       2018-7-4
 author:     Leyou
 header-img: img/k8s.png
 catalog: true
