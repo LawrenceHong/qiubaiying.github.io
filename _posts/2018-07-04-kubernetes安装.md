@@ -4,7 +4,7 @@ title:      How to use Cassandra
 subtitle:  
 date:       2018-07-04
 author:     Leyou
-header-img: img/cassandra.jpg
+header-img: img/k8s.png
 catalog: true
 tags:   
 ---
